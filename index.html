@@ -3,163 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDENTIK - Instrumen Identifikasi ABK</title>
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for parsing logic, ExcelJS for styling-preserved export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="style.css">
+    <title>Website Sedang Dalam Maintenance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .maintenance-card {
+            max-width: 480px;
+            width: 100%;
+            padding: 40px 30px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .gear-container {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px auto;
+        }
+
+        .gear {
+            position: absolute;
+            fill: #38bdf8;
+            transform-origin: center;
+        }
+
+        .gear-large {
+            width: 80px;
+            height: 80px;
+            top: 5px;
+            left: 5px;
+            animation: spin 6s linear infinite;
+        }
+
+        .gear-small {
+            width: 50px;
+            height: 50px;
+            bottom: 10px;
+            right: 10px;
+            fill: #818cf8;
+            animation: spin-reverse 4s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spin-reverse {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: rgba(56, 189, 248, 0.1);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        p {
+            font-size: 0.95rem;
+            color: #94a3b8;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .contact-info {
+            font-size: 0.85rem;
+            color: #64748b;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+        }
+
+        .contact-info a {
+            color: #38bdf8;
+            text-decoration: none;
+        }
+
+        .contact-info a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
 
-    <!-- Background Decoration -->
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-    <div class="bg-shape shape-3"></div>
-
-    <div class="app-container">
-        <!-- Header -->
-        <header class="app-header glass">
-            <div class="logo">
-                <i class="fa-solid fa-hands-holding-child"></i>
-                <div>
-                    <h1>IDENTIK</h1>
-                    <p>Instrumen Identifikasi Peserta Didik Berkebutuhan Khusus</p>
-                </div>
-            </div>
-            <div class="header-actions">
-                <button id="btnReset" class="btn btn-outline" title="Reset Semua Data"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-            </div>
-        </header>
-
-        <!-- Loader -->
-        <div id="loader" class="loader-container glass">
-            <div class="spinner"></div>
-            <p>Memuat Database Instrumen...</p>
+    <div class="maintenance-card">
+        <!-- Visual Animasi Roda Gigi -->
+        <div class="gear-container">
+            <svg class="gear gear-large" viewBox="0 0 24 24">
+                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+            <svg class="gear gear-small" viewBox="0 0 24 24">
+                <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
         </div>
 
-        <!-- Main Content (Hidden until loaded) -->
-        <main id="mainContent" class="hidden">
-            
-            <!-- Step 1: Identitas -->
-            <section id="stepIdentitas" class="step-section glass active">
-                <div class="section-header">
-                    <h2><i class="fa-regular fa-id-card"></i> Identitas Peserta Didik</h2>
-                    <p>Silakan lengkapi data peserta didik sebelum memulai proses identifikasi.</p>
-                </div>
-                
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nama</label>
-                        <input type="text" id="identitas_nama" placeholder="Masukkan nama lengkap" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Tempat, Tgl Lahir</label>
-                        <input type="text" id="identitas_ttl" placeholder="Cth: Jakarta, 12 Agustus 2010">
-                    </div>
-                    <div class="form-group">
-                        <label>Jenis Kelamin</label>
-                        <select id="identitas_jk">
-                            <option value="">-- Pilih --</option>
-                            <option value="L">Laki-laki (L)</option>
-                            <option value="P">Perempuan (P)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Sekolah</label>
-                        <input type="text" id="identitas_sekolah" placeholder="Nama Sekolah">
-                    </div>
-                    <div class="form-group">
-                        <label>Kelas</label>
-                        <input type="text" id="identitas_kelas" placeholder="Cth: X IPA 1">
-                    </div>
-                    <div class="form-group">
-                        <label>Alamat Rumah</label>
-                        <input type="text" id="identitas_alamat_rumah" placeholder="Alamat Rumah">
-                    </div>
-                    <div class="form-group">
-                        <label>Alamat Sekolah</label>
-                        <input type="text" id="identitas_alamat_sekolah" placeholder="Alamat Sekolah">
-                    </div>
-                    <div class="form-group">
-                        <label>Tanggal Pengisian</label>
-                        <input type="date" id="identitas_tanggal">
-                    </div>
-                    <div class="form-group">
-                        <label>Nama Asesor</label>
-                        <input type="text" id="identitas_asesor" placeholder="Nama Asesor">
-                    </div>
-                </div>
-
-                <div class="section-footer">
-                    <button id="btnMulaiIdentifikasi" class="btn btn-primary">
-                        Mulai Identifikasi <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </section>
-
-            <!-- Step 2: Instrumen Identifikasi -->
-            <section id="stepInstrumen" class="step-section hidden">
-                <!-- Placeholder State (Before selecting category) -->
-                <div class="kategori-header glass" id="kategoriHeaderPlaceholder" style="margin-bottom: 2rem;">
-                    <h2><i class="fa-solid fa-hand-pointer"></i> Pilih Kategori Hambatan</h2>
-                    <p>Berdasarkan observasi awal, silakan pilih kategori hambatan yang diduga pada menu kategori untuk mulai mengisi instrumen.</p>
-                </div>
-
-                <div class="instrumen-layout">
-                    
-                    <!-- Sidebar Kategori -->
-                    <aside class="kategori-sidebar glass">
-                        <h3>Kategori Hambatan</h3>
-                        <div class="progress-info">
-                            <span id="progressText">0/10</span>
-                            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-                        </div>
-                        <ul id="kategoriList" class="kategori-list">
-                            <!-- Injected by JS -->
-                        </ul>
-
-                        <button id="btnEditIdentitas" class="btn btn-outline w-100 mt-2" style="border-color: #cbd5e1; color: #475569;">
-                            <i class="fa-solid fa-user-pen"></i> Edit Identitas
-                        </button>
-                    </aside>
-
-                    <!-- Area Pertanyaan -->
-                    <div class="pertanyaan-area glass" id="mainPertanyaanArea">
-
-                        <!-- Active State (After selecting category) -->
-                        <div class="kategori-header hidden" id="kategoriHeaderActive">
-                            <h2 id="kategoriTitle">Judul Kategori</h2>
-                            <p id="kategoriPetunjuk">Pilih Ya dan Tidak sesuai dengan gejala yang tampak/ diperoleh</p>
-                        </div>
-                        
-                        <div id="pertanyaanContainer" class="pertanyaan-container">
-                            <!-- Injected by JS -->
-                        </div>
-
-                        <div class="nav-buttons" id="navButtonsContainer" style="display: none;">
-                            <button id="btnPrevCat" class="btn btn-outline"><i class="fa-solid fa-angle-left"></i> Sebelumnya</button>
-                            <button id="btnNextCat" class="btn btn-primary">Selanjutnya <i class="fa-solid fa-angle-right"></i></button>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-        </main>
-
-
-
+        <div class="badge">Pemeliharaan Rutin</div>
+        <h1>Kami Akan Segera Kembali</h1>
+        <p>Website sedang mengalami peningkatan sistem untuk memberikan layanan yang lebih baik. Silakan kunjungi kembali beberapa saat lagi.</p>
+        
+        <div class="contact-info">
+            Butuh bantuan mendesak? Hubungi <a href="mailto:support@domain.com">support@domain.com</a>
+        </div>
     </div>
 
-    <!-- Base64 Excel Database -->
-    <script src="database_base64.js"></script>
-    <!-- App Logic -->
-    <script src="app.js?v=11"></script>
 </body>
 </html>
