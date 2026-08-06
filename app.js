@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSignature();
 });
 
-window.saveCatatanUmum = function() {
+window.saveCatatanUmum = function () {
     databaseConfig.catatanUmum = document.getElementById('catatan_umum') ? document.getElementById('catatan_umum').value : '';
     saveState();
 };
@@ -27,9 +27,9 @@ async function initDatabase() {
     try {
         // base64 loaded from database_base64.js
         workbook = XLSX.read(database_base64, { type: 'base64' });
-        
+
         parseWorkbookStructure(workbook);
-        
+
         document.getElementById('loader').classList.add('hidden');
         document.getElementById('mainContent').classList.remove('hidden');
     } catch (error) {
@@ -50,16 +50,16 @@ function parseWorkbookStructure(wb) {
     // Mapping nama sheet Excel -> nama tampil kategori di frontend
     // Urutan sesuai permintaan: 10 kategori
     const SHEET_CATEGORY_MAP = {
-        "H. Penglihatan":  "Hambatan Penglihatan",
-        "H. Pendengaran":  "Hambatan Pendengaran",
-        "H. Intelektual":  "Hambatan Intelektual",
-        "H. Fisik Motorik":"Hambatan Fisik Motorik",
-        "H. Emosional":    "Hambatan Emosional",
-        "AUTISM":          "AUTISM",
-        "ADHD":            "ADHD",
-        "Slow Leaner":     "Slow Learner",   // typo di file Excel (Leaner bukan Learner)
-        "Kesulitan Belajar":"Kesulitan Belajar",
-        "CIBI":            "CIBI (Cerdas Istimewa Bakat Istimewa)"
+        "H. Penglihatan": "Hambatan Penglihatan",
+        "H. Pendengaran": "Hambatan Pendengaran",
+        "H. Intelektual": "Hambatan Intelektual",
+        "H. Fisik Motorik": "Hambatan Fisik Motorik",
+        "H. Emosional": "Hambatan Emosional",
+        "AUTISM": "AUTISM",
+        "ADHD": "ADHD",
+        "Slow Leaner": "Slow Learner",   // typo di file Excel (Leaner bukan Learner)
+        "Kesulitan Belajar": "Kesulitan Belajar",
+        "CIBI": "CIBI (Cerdas Istimewa Bakat Istimewa)"
     };
 
     databaseConfig.categories = [];
@@ -89,7 +89,7 @@ function parseWorkbookStructure(wb) {
         for (let R = range.s.r; R <= endRow; ++R) {
             let rowValues = [];
             for (let C = range.s.c; C <= endCol; ++C) {
-                let cell = sheet[XLSX.utils.encode_cell({c: C, r: R})];
+                let cell = sheet[XLSX.utils.encode_cell({ c: C, r: R })];
                 rowValues.push(cell ? cell.v : undefined);
             }
 
@@ -123,8 +123,8 @@ function parseWorkbookStructure(wb) {
                 if (rowValues[i] && typeof rowValues[i] === 'string' && rowValues[i].length > 8) {
                     textCandidate = rowValues[i];
                     foundColIndex = i;
-                    if (rowValues[i-1] !== null && rowValues[i-1] !== undefined && String(rowValues[i-1]).length <= 5) {
-                        noCandidate = rowValues[i-1];
+                    if (rowValues[i - 1] !== null && rowValues[i - 1] !== undefined && String(rowValues[i - 1]).length <= 5) {
+                        noCandidate = rowValues[i - 1];
                     }
                     break;
                 }
@@ -158,6 +158,7 @@ function parseWorkbookStructure(wb) {
                 upperText === "TEKNIK" || upperText === "AUTIS" || upperText === "AUTISM" ||
                 upperText === "TIDAK TERIDENTIFIKASI" || upperText === "TERIDENTIFIKASI" ||
                 upperText === "DIDUGA" || upperText === "TUNANETRA TOTAL" ||
+                upperText === "TUNAGRAHITA" || upperText === "DIDUGA TUNAGRAHITA" ||
                 upperText.startsWith("YA=1") || upperText.startsWith("TIDAK=0") ||
                 upperText.includes("KETIK ANGKA") || upperText.includes("KOLOM WARNA KUNING") ||
                 upperText.includes("TEMUAN LAIN") || upperText.includes("TULISKAN TEMUAN")) {
@@ -188,6 +189,9 @@ function parseWorkbookStructure(wb) {
 
             // Khusus Penglihatan: batasi maks 18 pertanyaan (ada pertanyaan ke-19 yang di-drop)
             if (categoryDisplayName === "Hambatan Penglihatan" && questions.length === 18) continue;
+
+            // Khusus Intelektual: batasi maks 16 pertanyaan (pertanyaan ke-17 adalah teks kesimpulan, bukan pertanyaan)
+            if (categoryDisplayName === "Hambatan Intelektual" && questions.length === 16) continue;
 
             questions.push({
                 id: `q_${sheetName}_${R}`,
@@ -230,7 +234,7 @@ function parseWorkbookStructure(wb) {
 function renderSidebar() {
     const list = document.getElementById('kategoriList');
     list.innerHTML = '';
-    
+
     databaseConfig.categories.forEach((cat, index) => {
         const li = document.createElement('li');
         li.className = `kategori-item ${index === currentCategoryIndex ? 'active' : ''}`;
@@ -247,7 +251,7 @@ function renderSidebar() {
         };
         list.appendChild(li);
     });
-    
+
     renderCategory();
     updateProgress();
 }
@@ -278,7 +282,7 @@ function renderCategory() {
 
     const cat = databaseConfig.categories[currentCategoryIndex];
     document.getElementById('kategoriTitle').innerText = cat.title || cat.name;
-    
+
     const subtitleEl = document.getElementById('kategoriPetunjuk');
     if (subtitleEl) {
         if (cat.instruction) {
@@ -287,22 +291,22 @@ function renderCategory() {
             subtitleEl.innerText = "Pilih Ya dan Tidak sesuai dengan gejala yang tampak/ diperoleh";
         }
     }
-    
+
     // Cek apakah sudah di halaman kesimpulan (index 1)
     if (currentQuestionIndex >= 1) {
         renderKesimpulan(cat);
         return;
     }
-    
+
     let html = '';
     let currentSub = null;
-    
+
     let answeredCount = 0;
     cat.questions.forEach(q => {
         if (answers[q.id] && answers[q.id].value) answeredCount++;
     });
     let progressPercent = cat.questions.length > 0 ? (answeredCount / cat.questions.length) * 100 : 0;
-    
+
     html += `
         <div class="progress-info" style="margin-bottom: 1rem;">
             <span id="catProgressText">Terjawab ${answeredCount} dari ${cat.questions.length} Pertanyaan</span>
@@ -312,12 +316,12 @@ function renderCategory() {
 
     cat.questions.forEach((q) => {
         const savedAnswer = answers[q.id] || {};
-        
+
         if (q.subCategory && q.subCategory !== "Umum" && q.subCategory !== currentSub) {
             html += `<div style="background: #e2e8f0; padding: 0.75rem 1rem; border-radius: 6px; font-weight: bold; color: #1e293b; margin-bottom: 1rem; margin-top: 1rem; border-left: 4px solid var(--primary-color);">Kategori: ${q.subCategory}</div>`;
             currentSub = q.subCategory;
         }
-        
+
         html += `
         <div class="pertanyaan-card" style="margin-bottom: 0.5rem;">
             <div class="pertanyaan-text">${q.no && q.no !== '-' ? q.no + '. ' : ''}${q.text}</div>
@@ -338,7 +342,7 @@ function renderCategory() {
         </div>
         `;
     });
-    
+
     container.innerHTML = html;
 
     // Tombol Navigasi
@@ -352,7 +356,7 @@ function renderCategory() {
 function renderKesimpulan(cat) {
     const container = document.getElementById('pertanyaanContainer');
     const isAutismCategory = cat.name && cat.name.toUpperCase().includes('AUTISM');
-    
+
     // Kelompokkan berdasarkan sub-kategori
     const subCategories = {};
     cat.questions.forEach(q => {
@@ -363,7 +367,7 @@ function renderKesimpulan(cat) {
         subCategories[sub].total++;
         let b = q.bobot || 0;
         subCategories[sub].bobotMax += b;
-        
+
         if (answers[q.id] && answers[q.id].value === 'Ya') {
             subCategories[sub].count++;
             subCategories[sub].bobotTotal += b;
@@ -383,7 +387,7 @@ function renderKesimpulan(cat) {
         };
         const isDanger = stats.bobotTotal >= 100;
         const bobotInfo = stats.bobotMax > 0 ? `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: normal;">(Skor: ${stats.bobotTotal} / ${stats.bobotMax})</span>` : '';
-        
+
         // Simpan kesimpulan Autism ke database config
         databaseConfig.autismKesimpulan = {
             isDiagnosed: isDanger,
@@ -393,12 +397,13 @@ function renderKesimpulan(cat) {
             resultText: isDanger ? 'Diduga Autism' : 'Tidak Teridentifikasi'
         };
 
-        const conclusionText = databaseConfig.autismKesimpulan.resultText;
+        const conclusionText = isDanger ? 'AUTIS' : 'Tidak Teridentifikasi';
         const conclusionStyle = isDanger ? 'color: var(--danger); font-weight: bold;' : 'color: inherit; font-weight: normal;';
         tableRows += `
         <tr>
             <td rowspan="1" style="border: 1px solid #cbd5e1; padding: 1rem; text-align: center; font-weight: bold; width: 30%; font-size: 1.1rem; background: #f8fafc;">KESIMPULAN</td>
-            <td colspan="2" style="border: 1px solid #cbd5e1; padding: 1rem; ${conclusionStyle};">${conclusionText}${bobotInfo}</td>
+            <td style="border: 1px solid #cbd5e1; padding: 1rem; width: 40%;">Diduga</td>
+            <td style="border: 1px solid #cbd5e1; padding: 1rem; ${conclusionStyle};">${conclusionText}${bobotInfo}</td>
         </tr>`;
     } else {
         subCatKeys.forEach((subCat, idx) => {
@@ -422,6 +427,94 @@ function renderKesimpulan(cat) {
                     status = "Tidak Teridentifikasi";
                     isDanger = false;
                 }
+            } else if (subCat.toUpperCase().includes("A.") && (subCat.toUpperCase().includes("BERAT") || subCat.toUpperCase().includes("MENYELURUH"))) {
+                // Pendengaran - Sub-kategori A: Tunarungu Berat/Menyeluruh
+                if (stats.bobotTotal >= 100) {
+                    status = "Tunarungu Berat/Menyeluruh";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (subCat.toUpperCase().includes("B.") && subCat.toUpperCase().includes("SEBAGIAN")) {
+                // Pendengaran - Sub-kategori B: Tunarungu Sebagian
+                if (stats.bobotTotal >= 100) {
+                    status = "Tunarungu Sebagian";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("INTELEKTUAL")) {
+                // Intelektual: satu kesimpulan global — Tunagrahita
+                if (stats.bobotTotal >= 100) {
+                    status = "Tunagrahita";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("FISIK")) {
+                // Fisik Motorik: satu kesimpulan global — Tunadaksa
+                if (stats.bobotTotal >= 100) {
+                    status = "Tunadaksa";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("EMOSIONAL")) {
+                // Emosional: satu kesimpulan global — Tunalaras
+                if (stats.bobotTotal >= 100) {
+                    status = "Tunalaras";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && (cat.name.toUpperCase().includes("SLOW LEARNER") || cat.name.toUpperCase().includes("SLOW LEANER"))) {
+                // Slow Learner: satu kesimpulan global — SLOW LEARNER/LAMBAN BELAJAR
+                if (stats.bobotTotal >= 100) {
+                    status = "SLOW LEARNER/LAMBAN BELAJAR";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("KESULITAN BELAJAR")) {
+                // Kesulitan Belajar: tiga sub-kategori berdasarkan nama sub-kategori
+                const subUpper = subCat.toUpperCase();
+                if (subUpper.includes("DISLEKSIA")) {
+                    status = stats.bobotTotal >= 100 ? "DISLEKSIA" : "Tidak Teridentifikasi";
+                    isDanger = stats.bobotTotal >= 100;
+                } else if (subUpper.includes("DISGRAFIA")) {
+                    status = stats.bobotTotal >= 100 ? "DISGRAFIA" : "Tidak Teridentifikasi";
+                    isDanger = stats.bobotTotal >= 100;
+                } else if (subUpper.includes("DISKALKULIA")) {
+                    status = stats.bobotTotal >= 100 ? "DISKALKULIA" : "Tidak Teridentifikasi";
+                    isDanger = stats.bobotTotal >= 100;
+                } else {
+                    status = stats.bobotTotal >= 100 ? "Teridentifikasi" : "Tidak Teridentifikasi";
+                    isDanger = stats.bobotTotal >= 100;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("ADHD")) {
+                // ADHD: satu kesimpulan global — ADHD/HIPERAKTIF
+                if (stats.bobotTotal >= 100) {
+                    status = "ADHD/HIPERAKTIF";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
+            } else if (cat.name && cat.name.toUpperCase().includes("CIBI")) {
+                // CIBI: satu kesimpulan global — CERDAS ISTIMEWA
+                if (stats.bobotTotal >= 100) {
+                    status = "CERDAS ISTIMEWA";
+                    isDanger = true;
+                } else {
+                    status = "Tidak Teridentifikasi";
+                    isDanger = false;
+                }
             }
 
             let label = "Diduga";
@@ -430,12 +523,12 @@ function renderKesimpulan(cat) {
                 if (prefixMatch) {
                     label = `${prefixMatch[1]}. Diduga`;
                 } else {
-                    label = `${subCat} Diduga`;
+                    label = `Diduga`;
                 }
             }
 
             let bobotInfo = stats.bobotMax > 0 ? `<br><span style="font-size: 0.9rem; color: #64748b; font-weight: normal;">(Skor: ${stats.bobotTotal} / ${stats.bobotMax})</span>` : '';
-            
+
             // Tambahkan skor ke status jika ada
             let displayStatus = status;
             if (isDanger && bobotInfo) {
@@ -490,10 +583,10 @@ function renderKesimpulan(cat) {
     document.getElementById('btnPrevCat').style.visibility = 'visible';
     document.getElementById('btnPrevCat').style.display = 'inline-flex';
     document.getElementById('btnNextCat').style.display = 'none';
-    
+
     // Tandai kategori selesai jika kesimpulan dicapai
     const items = document.querySelectorAll('.kategori-item');
-    if(items[currentCategoryIndex]) {
+    if (items[currentCategoryIndex]) {
         items[currentCategoryIndex].classList.add('completed');
     }
     updateProgress();
@@ -517,7 +610,7 @@ function setupEventListeners() {
         document.getElementById('stepIdentitas').classList.remove('active');
         document.getElementById('stepIdentitas').classList.add('hidden');
         document.getElementById('stepInstrumen').classList.remove('hidden');
-        
+
         if (currentCategoryIndex === -1 && databaseConfig.categories.length > 0) {
             selectCategory(0);
         }
@@ -546,7 +639,7 @@ function setupEventListeners() {
     });
 
     document.getElementById('btnReset').addEventListener('click', () => {
-        if(confirm("Apakah Anda yakin ingin mereset semua data?")) {
+        if (confirm("Apakah Anda yakin ingin mereset semua data?")) {
             localStorage.removeItem('answers_inklusi_pintar');
             localStorage.removeItem('identitas_inklusi_pintar');
             localStorage.removeItem('catatan_umum_inklusi_pintar');
@@ -557,11 +650,11 @@ function setupEventListeners() {
     });
 }
 
-window.saveCurrentQuestionData = function() {
+window.saveCurrentQuestionData = function () {
     if (currentCategoryIndex === -1) return;
     const cat = databaseConfig.categories[currentCategoryIndex];
     if (currentQuestionIndex >= 1) return; // Sedang di layar kesimpulan
-    
+
     let answeredCount = 0;
     cat.questions.forEach(q => {
         const radios = document.getElementsByName('jawaban_' + q.id);
@@ -574,7 +667,7 @@ window.saveCurrentQuestionData = function() {
             answeredCount++;
         }
     });
-    
+
     // Update progress bar secara real-time
     const progressText = document.getElementById('catProgressText');
     const progressFill = document.getElementById('catProgressFill');
@@ -582,11 +675,11 @@ window.saveCurrentQuestionData = function() {
         progressText.innerText = `Terjawab ${answeredCount} dari ${cat.questions.length} Pertanyaan`;
         progressFill.style.width = `${(answeredCount / cat.questions.length) * 100}%`;
     }
-    
+
     saveState();
 }
 
-window.saveCatatanUmum = function() {
+window.saveCatatanUmum = function () {
     const el = document.getElementById('catatan_umum');
     if (el) {
         databaseConfig.catatanUmum = el.value;
@@ -598,15 +691,15 @@ function updateProgress() {
     const total = databaseConfig.categories.length;
     const currentIndex = currentCategoryIndex === -1 ? 0 : currentCategoryIndex + 1;
     const percentage = total === 0 ? 0 : (currentIndex / total) * 100;
-    
+
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
-    
+
     if (progressFill) progressFill.style.width = `${percentage}%`;
     if (progressText) progressText.innerText = `${currentIndex}/${total}`;
 }
 
-window.prosesEkspor = function() {
+window.prosesEkspor = function () {
     if (window.saveCatatanUmum) saveCatatanUmum();
     // Pastikan autism kesimpulan tersimpan sebelum export
     saveState();
@@ -625,29 +718,29 @@ function saveState() {
 function loadSavedState() {
     const saved = localStorage.getItem('answers_inklusi_pintar');
     if (saved) {
-        try { answers = JSON.parse(saved); } catch(e){}
+        try { answers = JSON.parse(saved); } catch (e) { }
     }
     const savedIdentitas = localStorage.getItem('identitas_inklusi_pintar');
     if (savedIdentitas) {
-        try { 
-            databaseConfig.identitas = JSON.parse(savedIdentitas); 
+        try {
+            databaseConfig.identitas = JSON.parse(savedIdentitas);
             // Restore UI
             Object.keys(databaseConfig.identitas).forEach(key => {
                 const el = document.getElementById('identitas_' + key);
                 if (el) el.value = databaseConfig.identitas[key];
             });
-        } catch(e){}
+        } catch (e) { }
     }
     databaseConfig.catatanUmum = localStorage.getItem('catatan_umum_inklusi_pintar') || '';
-    
+
     const savedAutismKesimpulan = localStorage.getItem('autism_kesimpulan_inklusi_pintar');
     if (savedAutismKesimpulan) {
-        try { databaseConfig.autismKesimpulan = JSON.parse(savedAutismKesimpulan); } catch(e){}
+        try { databaseConfig.autismKesimpulan = JSON.parse(savedAutismKesimpulan); } catch (e) { }
     }
-    
+
     let catIdx = localStorage.getItem('current_cat_inklusi_pintar');
     if (catIdx !== null) currentCategoryIndex = parseInt(catIdx);
-    
+
     let qIdx = localStorage.getItem('current_q_inklusi_pintar');
     if (qIdx !== null) currentQuestionIndex = parseInt(qIdx);
 }
@@ -671,7 +764,7 @@ async function exportToExcel() {
         }
 
         const excelJsWorkbook = new ExcelJS.Workbook();
-        
+
         // Convert base64 string ke ArrayBuffer (bersihkan whitespace untuk mencegah DOMException)
         const cleanBase64 = database_base64.replace(/\s/g, '');
         const binaryString = window.atob(cleanBase64);
@@ -680,9 +773,9 @@ async function exportToExcel() {
         for (let i = 0; i < len; i++) {
             bytes[i] = binaryString.charCodeAt(i);
         }
-        
+
         await excelJsWorkbook.xlsx.load(bytes.buffer);
-        
+
         // Identifikasi sheet yang aktif
         let targetSheetName = null;
         let catNameSafe = "Kategori";
@@ -694,10 +787,24 @@ async function exportToExcel() {
                 targetSheetName = currentCat.questions[0].sheetName;
             }
         }
-        
+
         // 1. Injeksi Identitas (di sheet yang relevan)
         const firstSheet = targetSheetName ? excelJsWorkbook.getWorksheet(targetSheetName) : excelJsWorkbook.worksheets[0];
-        
+
+        // 1.0 Hapus data identitas bawaan template agar tidak ada sisa data lama yang terbawa ke ekspor
+        //     H. Intelektual : C3–C12
+        //     H. Emosional   : C4–C7
+        if (targetSheetName && targetSheetName === 'H. Intelektual' && firstSheet) {
+            for (let r = 3; r <= 12; r++) {
+                firstSheet.getRow(r).getCell(3).value = null; // Kolom C
+            }
+        }
+        if (targetSheetName && targetSheetName === 'H. Emosional' && firstSheet) {
+            for (let r = 4; r <= 7; r++) {
+                firstSheet.getRow(r).getCell(3).value = null; // Kolom C
+            }
+        }
+
         // Scan dinamis untuk lokasi label identitas agar kompatibel dengan semua template
         const identitasMap = {
             nama: null, jk: null, ttl: null,
@@ -712,10 +819,10 @@ async function exportToExcel() {
                     else if (cell.value.richText) cellValue = cell.value.richText.map(rt => rt.text).join('');
                     else cellValue = cell.value.toString();
                 }
-                
+
                 if (cellValue) {
                     let val = cellValue.toLowerCase().replace(/[^a-z0-9]/g, '');
-                    
+
                     let targetCol = colNumber + 1;
                     const nextCell = row.getCell(colNumber + 1);
                     let nextValue = "";
@@ -750,23 +857,18 @@ async function exportToExcel() {
         });
 
         // 1.5 Bersihkan sel bawaan dari template: set kolom F=0, hapus kolom H (catatan lama)
-        //     JANGAN timpa formula di kolom G — biarkan Excel menghitung sendiri via formula
+        //     Kolom G direset dengan formula D*F (result=0) agar konsisten dengan struktur template
         databaseConfig.categories.forEach(cat => {
             cat.questions.forEach(q => {
                 if (q.row > -1 && q.sheetName) {
                     const sheet = excelJsWorkbook.getWorksheet(q.sheetName);
                     if (sheet) {
-                        const rowObj = sheet.getRow(q.row + 1);
-                        rowObj.getCell(6).value = 0; // Kolom F = 0 (default Tidak)
+                        const excelRowNum = q.row + 1;
+                        const rowObj = sheet.getRow(excelRowNum);
+                        rowObj.getCell(6).value = 0;    // Kolom F = 0 (default Tidak)
+                        // G selalu pakai formula D*F yang benar (override formula lama yang mungkin salah)
+                        rowObj.getCell(7).value = { formula: `D${excelRowNum}*F${excelRowNum}`, result: 0 };
                         rowObj.getCell(8).value = null; // Hapus kolom H (catatan lama)
-                        
-                        // Update result-cache formula kolom G agar konsisten dengan F=0
-                        const skorCell = rowObj.getCell(7);
-                        if (skorCell.value && skorCell.value.formula) {
-                            skorCell.value = { formula: skorCell.value.formula, result: 0 };
-                        } else if (typeof skorCell.value === 'number') {
-                            skorCell.value = { formula: `D${q.row + 1}*F${q.row + 1}`, result: 0 };
-                        }
                     }
                 }
             });
@@ -777,20 +879,30 @@ async function exportToExcel() {
                     if (cat.questions.length > 0 && cat.questions[0].sheetName) {
                         const sheet = excelJsWorkbook.getWorksheet(cat.questions[0].sheetName);
                         if (sheet) {
-                            const rowObj = sheet.getRow(droppedRow + 1);
+                            const droppedExcelRow = droppedRow + 1;
+                            const rowObj = sheet.getRow(droppedExcelRow);
                             rowObj.getCell(6).value = 0;
+                            rowObj.getCell(7).value = { formula: `D${droppedExcelRow}*F${droppedExcelRow}`, result: 0 };
                             rowObj.getCell(8).value = null;
-                            const skorCell = rowObj.getCell(7);
-                            if (skorCell.value && skorCell.value.formula) {
-                                skorCell.value = { formula: skorCell.value.formula, result: 0 };
-                            }
                         }
                     }
                 });
             }
         });
 
-        // 2. Injeksi Jawaban Pengguna — hanya isi kolom F (1/0), update result-cache G
+        // Buat lookup map: sheetName+row -> bobot dari databaseConfig (sudah diparse benar oleh XLSX.js)
+        const bobotLookup = {};
+        databaseConfig.categories.forEach(cat => {
+            cat.questions.forEach(q => {
+                if (q.row > -1 && q.sheetName) {
+                    bobotLookup[`${q.sheetName}_${q.row}`] = q.bobot || 0;
+                }
+            });
+        });
+
+        // 2. Injeksi Jawaban Pengguna — isi kolom F (1/0), tulis formula D*F ke kolom G
+        // Bobot dibaca dari kolom D template (ExcelJS) sebagai sumber utama.
+        // Formula G selalu diset ke =D{row}*F{row} (mengganti formula template yang mungkin salah).
         Object.keys(answers).forEach(qId => {
             const ans = answers[qId];
             if (ans.row > -1 && ans.sheetName) {
@@ -801,29 +913,71 @@ async function exportToExcel() {
                 const rowObj = sheet.getRow(excelRow);
                 
                 // Isi kolom F dengan 1 atau 0
-                const fCell = rowObj.getCell(6);
                 const yaValue = (ans.value === 'Ya') ? 1 : 0;
-                fCell.value = yaValue;
+                rowObj.getCell(6).value = yaValue;
                 
-                // Ambil bobot dari kolom D template
+                // Baca bobot dari kolom D ExcelJS (sumber primer — nilai aktual di template)
+                // ExcelJS bisa mengembalikan: angka biasa ATAU objek {formula, result}
                 let bobot = 0;
-                const dCell = rowObj.getCell(4);
+                const dCell = rowObj.getCell(4); // Kolom D (1-indexed)
                 if (dCell.value !== null && dCell.value !== undefined) {
-                    bobot = parseFloat(dCell.value) || 0;
+                    if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                        bobot = parseFloat(dCell.value.result) || 0;
+                    } else {
+                        bobot = parseFloat(dCell.value) || 0;
+                    }
                 }
+                
+                // Fallback: gunakan bobot dari databaseConfig jika D kolom tidak terbaca
+                if (bobot === 0) {
+                    const dbBobot = bobotLookup[`${ans.sheetName}_${ans.row}`];
+                    if (dbBobot && dbBobot > 0) bobot = dbBobot;
+                }
+                
                 const calculatedSkor = bobot * yaValue;
                 
-                // Update result-cache formula kolom G agar formula SUM parent tahu nilainya
-                const gCell = rowObj.getCell(7);
-                if (gCell.value && gCell.value.formula) {
-                    // Pertahankan formula asli, update result-cache
-                    gCell.value = { formula: gCell.value.formula, result: calculatedSkor };
-                } else {
-                    // Buat formula baru jika tidak ada
-                    gCell.value = { formula: `D${excelRow}*F${excelRow}`, result: calculatedSkor };
-                }
+                // Tulis formula =D{row}*F{row} ke kolom G dengan result-cache yang benar
+                // Formula ini SELALU dipakai (mengganti formula template yang mungkin =F{row} saja)
+                // Dengan result-cache = bobot*yaValue, nilai tampil benar bahkan sebelum Excel recalculate
+                rowObj.getCell(7).value = { formula: `D${excelRow}*F${excelRow}`, result: calculatedSkor };
             }
         });
+
+        // 2.3 Bersihkan kolom F pada baris summary/total (misal F38, F39 di H. Penglihatan)
+        // Baris yang punya formula SUM atau IF di kolom G adalah baris summary, bukan baris input user.
+        // Nilai F=0 di baris ini tidak boleh ada karena bukan jawaban — hapus.
+        {
+            const questionRowBySheet = {};
+            databaseConfig.categories.forEach(cat => {
+                cat.questions.forEach(q => {
+                    if (q.row > -1 && q.sheetName) {
+                        if (!questionRowBySheet[q.sheetName]) questionRowBySheet[q.sheetName] = new Set();
+                        questionRowBySheet[q.sheetName].add(q.row + 1); // ExcelJS 1-indexed
+                    }
+                });
+            });
+
+            excelJsWorkbook.worksheets.forEach(sheet => {
+                const qRows = questionRowBySheet[sheet.name] || new Set();
+                sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+                    if (qRows.has(rowNumber)) return; // Lewati baris pertanyaan aktual
+                    const gCell = row.getCell(7);
+                    const gVal = gCell.value;
+                    // Baris summary: G punya formula SUM atau IF (bukan formula D*F sederhana)
+                    if (gVal && gVal.formula) {
+                        const fUpper = gVal.formula.toUpperCase();
+                        if (fUpper.includes('SUM') || fUpper.includes('IF(')) {
+                            row.getCell(6).value = null; // Hapus nilai F di baris summary
+                        }
+                    }
+                    // Juga clear baris non-pertanyaan yang punya F=0 dari template
+                    const fCell = row.getCell(6);
+                    if (fCell.value === 0) {
+                        fCell.value = null;
+                    }
+                });
+            });
+        }
 
         // 2.2 Injeksi Catatan Umum Temuan Lain
         if (databaseConfig.catatanUmum) {
@@ -838,7 +992,7 @@ async function exportToExcel() {
                         }
                     });
                 });
-                
+
                 if (foundRow > -1) {
                     // Masukkan ke baris di bawahnya (karena biasanya bentuknya teks pengantar panjang)
                     const noteCell = sheet.getRow(foundRow + 1).getCell(foundCol);
@@ -847,13 +1001,13 @@ async function exportToExcel() {
                 }
             });
         }
-        
+
         // 2.3 Update baris summary dan kesimpulan AUTISM secara khusus
         if (targetSheetName && targetSheetName.toUpperCase().includes('AUTISM')) {
             const autismSheet = excelJsWorkbook.getWorksheet(targetSheetName);
             if (autismSheet) {
                 const cat = currentCategoryIndex !== -1 ? databaseConfig.categories[currentCategoryIndex] : null;
-                
+
                 // Hitung total skor aktual dari jawaban
                 let totalSkor = 0;
                 if (cat) {
@@ -864,13 +1018,13 @@ async function exportToExcel() {
                     });
                 }
                 const isDiagnosed = totalSkor >= 100;
-                
+
                 // Scan sheet untuk menemukan:
                 // - Baris SUM total (biasanya berisi formula SUM(G...))
                 // - Baris KESIMPULAN
                 let sumRow = -1;       // baris yang punya formula SUM(G20:G32)
                 let kesimpulanRow = -1; // baris yang punya KESIMPULAN
-                
+
                 autismSheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
                     row.eachCell({ includeEmpty: false }, (cell, colNumber) => {
                         const cellVal = cell.value;
@@ -895,12 +1049,12 @@ async function exportToExcel() {
                         }
                     });
                 });
-                
+
                 // Jika tidak ketemu via scan, gunakan posisi hardcoded dari struktur template
                 // (berdasarkan inspeksi: SUM ada di G33, KESIMPULAN ada di row 38)
                 if (sumRow === -1) sumRow = 33;
                 if (kesimpulanRow === -1) kesimpulanRow = 38;
-                
+
                 // Update result-cache formula SUM di baris total
                 const sumRowObj = autismSheet.getRow(sumRow);
                 const sumCell = sumRowObj.getCell(7); // kolom G
@@ -909,21 +1063,21 @@ async function exportToExcel() {
                 } else {
                     sumCell.value = { formula: `SUM(G20:G32)`, result: totalSkor };
                 }
-                
+
                 // Hapus angka 1 di F33 (kolom F baris summary — bawaan template, bukan input user)
                 sumRowObj.getCell(6).value = null;
-                
+
                 // Update baris KESIMPULAN
                 const kesimpulanRowObj = autismSheet.getRow(kesimpulanRow);
-                
+
                 // A38 = "Kesimpulan" (set langsung — merged cell A38:C39, hanya isi master cell)
                 const cellA = kesimpulanRowObj.getCell(1);
                 cellA.value = 'Kesimpulan';
-                
+
                 // D38 = "Diduga" (merged cell D38:D39)
                 const cellD = kesimpulanRowObj.getCell(4);
                 cellD.value = 'Diduga';
-                
+
                 // E38 = update result-cache formula IF
                 const cellE = kesimpulanRowObj.getCell(5);
                 const resultText = isDiagnosed ? 'AUTIS' : 'Tidak teridentifikasi';
@@ -932,7 +1086,7 @@ async function exportToExcel() {
                 } else {
                     cellE.value = { formula: `IF(G${sumRow}<100,"Tidak teridentifikasi",IF(G${sumRow}>=100,"AUTIS"))`, result: resultText };
                 }
-                
+
                 // Hapus nilai B38 yang berisi skor lama dari template (jangan null — set ke empty string agar tidak corrupt merged)
                 // B38 ada dalam merged range A38:C39, jadi sebaiknya tidak disentuh
                 // Cukup pastikan D33 (bobot total) juga di-update
@@ -943,6 +1097,373 @@ async function exportToExcel() {
             }
         }
 
+        // 2.6 Injeksi Kesimpulan khusus H. Penglihatan (E44 = Tunanetra Total, E45 = Low Vision)
+        if (targetSheetName && targetSheetName === 'H. Penglihatan') {
+            const penglihatanSheet = excelJsWorkbook.getWorksheet('H. Penglihatan');
+            if (penglihatanSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'H. Penglihatan');
+                if (cat) {
+                    // Hitung bobotTotal per sub-kategori
+                    // Bobot dibaca dari kolom D ExcelJS (konsisten dengan logika G cell)
+                    const subCategories = {};
+                    cat.questions.forEach(q => {
+                        const sub = q.subCategory || 'Umum';
+                        if (!subCategories[sub]) subCategories[sub] = { bobotTotal: 0 };
+
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            // Baca bobot dari kolom D ExcelJS (sama dengan step 2)
+                            const excelRowNum = q.row + 1;
+                            const rowObj = penglihatanSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            // Fallback ke databaseConfig jika D tidak terbaca
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            subCategories[sub].bobotTotal += bobot;
+                        }
+                    });
+
+                    // Tentukan teks kesimpulan per sub-kategori (logika sama dengan renderKesimpulan)
+                    let kesimpulanA = 'Tidak Teridentifikasi'; // E44
+                    let kesimpulanB = 'Tidak Teridentifikasi'; // E45
+
+                    Object.keys(subCategories).forEach(subCat => {
+                        const upperSub = subCat.toUpperCase();
+                        if (upperSub.includes('A. BUTA')) {
+                            kesimpulanA = subCategories[subCat].bobotTotal >= 100 ? 'Tunanetra Total' : 'Tidak Teridentifikasi';
+                        } else if (upperSub.includes('B. LOW VISION')) {
+                            kesimpulanB = subCategories[subCat].bobotTotal >= 100 ? 'Low Vision' : 'Tidak Teridentifikasi';
+                        }
+                    });
+
+                    // Tulis langsung ke E44 dan E45
+                    penglihatanSheet.getRow(44).getCell(5).value = kesimpulanA;
+                    penglihatanSheet.getRow(45).getCell(5).value = kesimpulanB;
+                }
+            }
+        }
+
+        // 2.7 Injeksi Kesimpulan khusus H. Pendengaran (E36 = Tunarungu Berat/Menyeluruh, E37 = Tunarungu Sebagian)
+        if (targetSheetName && targetSheetName === 'H. Pendengaran') {
+            const pendengaranSheet = excelJsWorkbook.getWorksheet('H. Pendengaran');
+            if (pendengaranSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'H. Pendengaran');
+                if (cat) {
+                    // Hitung bobotTotal per sub-kategori
+                    // Bobot dibaca dari kolom D ExcelJS (konsisten dengan logika G cell)
+                    const subCategories = {};
+                    cat.questions.forEach(q => {
+                        const sub = q.subCategory || 'Umum';
+                        if (!subCategories[sub]) subCategories[sub] = { bobotTotal: 0 };
+
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = pendengaranSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            subCategories[sub].bobotTotal += bobot;
+                        }
+                    });
+
+                    // Tentukan teks kesimpulan per sub-kategori
+                    let kesimpulanA = 'Tidak Teridentifikasi'; // E36 = Tunarungu Berat/Menyeluruh
+                    let kesimpulanB = 'Tidak Teridentifikasi'; // E37 = Tunarungu Sebagian
+
+                    Object.keys(subCategories).forEach(subCat => {
+                        const upperSub = subCat.toUpperCase();
+                        if (upperSub.includes('A.') && (upperSub.includes('BERAT') || upperSub.includes('MENYELURUH'))) {
+                            kesimpulanA = subCategories[subCat].bobotTotal >= 100 ? 'Tunarungu Berat/Menyeluruh' : 'Tidak Teridentifikasi';
+                        } else if (upperSub.includes('B.') && upperSub.includes('SEBAGIAN')) {
+                            kesimpulanB = subCategories[subCat].bobotTotal >= 100 ? 'Tunarungu Sebagian' : 'Tidak Teridentifikasi';
+                        }
+                    });
+
+                    // Tulis langsung ke E36 dan E37
+                    pendengaranSheet.getRow(36).getCell(5).value = kesimpulanA;
+                    pendengaranSheet.getRow(37).getCell(5).value = kesimpulanB;
+                }
+            }
+        }
+
+        // 2.8 Injeksi Kesimpulan khusus H. Intelektual
+        // E41 = "Tunagrahita" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        // H41 = null (hapus teks "indikasi tunagrahita ringan" bawaan template)
+        if (targetSheetName && targetSheetName === 'H. Intelektual') {
+            const intelektualSheet = excelJsWorkbook.getWorksheet('H. Intelektual');
+            if (intelektualSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'H. Intelektual');
+                if (cat) {
+                    // Hitung total bobotTotal dari kolom D ExcelJS (konsisten dengan G cell)
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = intelektualSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    // Tentukan kesimpulan (sama dengan logika frontend)
+                    const kesimpulan = totalBobotYa >= 100 ? 'Tunagrahita' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E41
+                    intelektualSheet.getRow(41).getCell(5).value = kesimpulan;
+
+                    // Hapus teks bawaan template di H41 ("indikasi tunagrahita ringan")
+                    intelektualSheet.getRow(41).getCell(8).value = null;
+                }
+            }
+        }
+
+        // 2.9 Injeksi Kesimpulan khusus H. Fisik Motorik
+        // E30 = "Tunadaksa" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        if (targetSheetName && targetSheetName === 'H. Fisik Motorik') {
+            const fisikSheet = excelJsWorkbook.getWorksheet('H. Fisik Motorik');
+            if (fisikSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'H. Fisik Motorik');
+                if (cat) {
+                    // Hitung total bobotTotal dari kolom D ExcelJS (konsisten dengan G cell)
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = fisikSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    // Tentukan kesimpulan (sama dengan logika frontend)
+                    const kesimpulan = totalBobotYa >= 100 ? 'Tunadaksa' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E30
+                    fisikSheet.getRow(30).getCell(5).value = kesimpulan;
+                }
+            }
+        }
+
+        // 2.10 Injeksi Kesimpulan khusus H. Emosional
+        // E34 = "Tunalaras" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        if (targetSheetName && targetSheetName === 'H. Emosional') {
+            const emosionalSheet = excelJsWorkbook.getWorksheet('H. Emosional');
+            if (emosionalSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'H. Emosional');
+                if (cat) {
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = emosionalSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    const kesimpulan = totalBobotYa >= 100 ? 'Tunalaras' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E34
+                    emosionalSheet.getRow(34).getCell(5).value = kesimpulan;
+                }
+            }
+        }
+
+        // 2.11 Injeksi Kesimpulan khusus ADHD
+        // E44 = "ADHD/HIPERAKTIF" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        if (targetSheetName && targetSheetName === 'ADHD') {
+            const adhdSheet = excelJsWorkbook.getWorksheet('ADHD');
+            if (adhdSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'ADHD');
+                if (cat) {
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = adhdSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    const kesimpulan = totalBobotYa >= 100 ? 'ADHD/HIPERAKTIF' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E44
+                    adhdSheet.getRow(44).getCell(5).value = kesimpulan;
+                }
+            }
+        }
+
+        // 2.12 Injeksi Kesimpulan khusus Slow Learner
+        // E35 = "SLOW LEARNER/LAMBAN BELAJAR" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        if (targetSheetName && targetSheetName === 'Slow Leaner') {
+            const slowLearnerSheet = excelJsWorkbook.getWorksheet('Slow Leaner');
+            if (slowLearnerSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'Slow Leaner');
+                if (cat) {
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = slowLearnerSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    const kesimpulan = totalBobotYa >= 100 ? 'SLOW LEARNER/LAMBAN BELAJAR' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E35
+                    slowLearnerSheet.getRow(35).getCell(5).value = kesimpulan;
+                }
+            }
+        }
+
+        // 2.13 Injeksi Kesimpulan khusus Kesulitan Belajar
+        // E39 = "DISLEKSIA", E40 = "DISGRAFIA", E41 = "DISKALKULIA" atau "Tidak Teridentifikasi"
+        if (targetSheetName && targetSheetName === 'Kesulitan Belajar') {
+            const kesulitanSheet = excelJsWorkbook.getWorksheet('Kesulitan Belajar');
+            if (kesulitanSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'Kesulitan Belajar');
+                if (cat) {
+                    // Hitung bobotTotal per sub-kategori
+                    const subCategories = {};
+                    cat.questions.forEach(q => {
+                        const sub = q.subCategory || 'Umum';
+                        if (!subCategories[sub]) subCategories[sub] = { bobotTotal: 0 };
+
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = kesulitanSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            subCategories[sub].bobotTotal += bobot;
+                        }
+                    });
+
+                    // Tentukan kesimpulan per sub-kategori
+                    let kesimpulanDisleksia = 'Tidak Teridentifikasi';  // E39
+                    let kesimpulanDisgrafia  = 'Tidak Teridentifikasi';  // E40
+                    let kesimpulanDiskalkulia = 'Tidak Teridentifikasi'; // E41
+
+                    Object.keys(subCategories).forEach(subCat => {
+                        const upperSub = subCat.toUpperCase();
+                        if (upperSub.includes('DISLEKSIA')) {
+                            kesimpulanDisleksia = subCategories[subCat].bobotTotal >= 100 ? 'DISLEKSIA' : 'Tidak Teridentifikasi';
+                        } else if (upperSub.includes('DISGRAFIA')) {
+                            kesimpulanDisgrafia = subCategories[subCat].bobotTotal >= 100 ? 'DISGRAFIA' : 'Tidak Teridentifikasi';
+                        } else if (upperSub.includes('DISKALKULIA')) {
+                            kesimpulanDiskalkulia = subCategories[subCat].bobotTotal >= 100 ? 'DISKALKULIA' : 'Tidak Teridentifikasi';
+                        }
+                    });
+
+                    // Tulis ke E39, E40, E41
+                    kesulitanSheet.getRow(39).getCell(5).value = kesimpulanDisleksia;
+                    kesulitanSheet.getRow(40).getCell(5).value = kesimpulanDisgrafia;
+                    kesulitanSheet.getRow(41).getCell(5).value = kesimpulanDiskalkulia;
+                }
+            }
+        }
+
+        // 2.14 Injeksi Kesimpulan khusus CIBI
+        // E49 = "CERDAS ISTIMEWA" atau "Tidak Teridentifikasi" (sesuai logika frontend renderKesimpulan)
+        if (targetSheetName && targetSheetName === 'CIBI') {
+            const cibiSheet = excelJsWorkbook.getWorksheet('CIBI');
+            if (cibiSheet) {
+                const cat = databaseConfig.categories.find(c => c.sheetName === 'CIBI');
+                if (cat) {
+                    let totalBobotYa = 0;
+                    cat.questions.forEach(q => {
+                        if (answers[q.id] && answers[q.id].value === 'Ya') {
+                            const excelRowNum = q.row + 1;
+                            const rowObj = cibiSheet.getRow(excelRowNum);
+                            const dCell = rowObj.getCell(4);
+                            let bobot = 0;
+                            if (dCell.value !== null && dCell.value !== undefined) {
+                                if (typeof dCell.value === 'object' && dCell.value.result !== undefined) {
+                                    bobot = parseFloat(dCell.value.result) || 0;
+                                } else {
+                                    bobot = parseFloat(dCell.value) || 0;
+                                }
+                            }
+                            if (bobot === 0) bobot = q.bobot || 0;
+                            totalBobotYa += bobot;
+                        }
+                    });
+
+                    const kesimpulan = totalBobotYa >= 100 ? 'CERDAS ISTIMEWA' : 'Tidak Teridentifikasi';
+
+                    // Tulis ke E49
+                    cibiSheet.getRow(49).getCell(5).value = kesimpulan;
+                }
+            }
+        }
 
         // 2.5 Hapus Warna Kuning dan Biru (agar ramah print)
         excelJsWorkbook.worksheets.forEach(sheet => {
@@ -966,14 +1487,14 @@ async function exportToExcel() {
                 colF.fill = undefined;
             }
         });
-        
+
         // 2.6 Bersihkan teks yang tidak diperlukan dari data
         excelJsWorkbook.worksheets.forEach(sheet => {
             sheet.eachRow({ includeEmpty: true }, row => {
                 row.eachCell({ includeEmpty: true }, cell => {
                     if (cell.value && typeof cell.value === 'string') {
                         // Bersihkan "belum ada respon" dan "khais"
-                        if (cell.value.toLowerCase().includes('belum ada respon') || 
+                        if (cell.value.toLowerCase().includes('belum ada respon') ||
                             cell.value.toLowerCase().includes('khais')) {
                             cell.value = '';
                         }
@@ -985,7 +1506,7 @@ async function exportToExcel() {
         // 3. Hapus Worksheet (Tab/Sheet) Kategori Lain
         if (targetSheetName) {
             const sheetIdsToRemove = [];
-            excelJsWorkbook.eachSheet(function(worksheet, sheetId) {
+            excelJsWorkbook.eachSheet(function (worksheet, sheetId) {
                 if (worksheet.name !== targetSheetName) {
                     sheetIdsToRemove.push(sheetId);
                 }
@@ -1003,7 +1524,7 @@ async function exportToExcel() {
 
         const buffer = await excelJsWorkbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        
+
         // Buat nama file yang relevan (Siswa_Kategori.xlsx)
         let safeName = "Siswa";
         if (databaseConfig.identitas && databaseConfig.identitas.nama) {
@@ -1019,7 +1540,7 @@ async function exportToExcel() {
         a.click();
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
-        
+
         if (btn) {
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Berhasil Diunduh';
             setTimeout(() => {
