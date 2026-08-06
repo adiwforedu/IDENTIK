@@ -1,16 +1,16 @@
 :root {
-    --primary-color: #2b5c77; /* Deep Navy */
-    --primary-hover: #1e4155;
-    --secondary-color: #8fa998; /* Sage Green */
-    --accent-color: #f4b942;
-    --text-main: #2c3e50;
-    --text-light: #7f8c8d;
-    --bg-color: #f0f4f8; /* Soft slate gray bg */
+    --primary-color: #512da8; /* Deep Purple (Ungu Tua) */
+    --primary-hover: #311b92; /* Ungu Lebih Tua untuk Hover */
+    --secondary-color: #b39ddb; /* Light Purple (Ungu Muda) */
+    --accent-color: #ffb300; /* Aksen Kuning/Amber untuk kontras */
+    --text-main: #212121; /* Teks Hitam Pekat */
+    --text-light: #757575; /* Teks Abu-abu */
+    --bg-color: #ffffff; /* Latar Belakang Putih */
     --glass-bg: rgba(255, 255, 255, 0.85);
     --glass-border: rgba(255, 255, 255, 0.4);
-    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-    --danger: #e74c3c;
-    --success: #27ae60;
+    --glass-shadow: 0 8px 32px 0 rgba(81, 45, 168, 0.07); /* Bayangan dengan hint ungu */
+    --danger: #e53935;
+    --success: #43a047;
     --radius: 16px;
     --transition: all 0.3s ease;
 }
@@ -42,14 +42,14 @@ body {
     left: -100px;
     width: 400px;
     height: 400px;
-    background: rgba(143, 169, 152, 0.4); /* Sage Green */
+    background: rgba(179, 157, 219, 0.4); /* Ungu Muda */
 }
 .shape-2 {
     bottom: -150px;
     right: -50px;
     width: 500px;
     height: 500px;
-    background: rgba(43, 92, 119, 0.2); /* Deep Navy */
+    background: rgba(81, 45, 168, 0.2); /* Ungu Tua */
 }
 .shape-3 {
     top: 40%;
@@ -57,7 +57,7 @@ body {
     transform: translate(-50%, -50%);
     width: 600px;
     height: 600px;
-    background: rgba(244, 185, 66, 0.1); /* Accent */
+    background: rgba(255, 179, 0, 0.1); /* Aksen */
 }
 
 /* Glassmorphism Utility */
@@ -128,25 +128,32 @@ body {
 .btn-primary:hover {
     background: var(--primary-hover);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(43, 92, 119, 0.3);
+    box-shadow: 0 4px 12px rgba(81, 45, 168, 0.3);
 }
 .btn-outline {
     background: transparent;
     color: var(--primary-color);
     border: 2px solid var(--primary-color);
+    transition: var(--transition);
 }
+
 .btn-outline:hover {
-    background: var(--primary-color);
-    color: white;
+    background: var(--primary-color) !important;
+    color: #ffffff !important;
+}
+
+/* Memastikan ikon (<i>) atau teks lain di dalam tombol juga ikut berubah menjadi putih saat tombol di-hover */
+.btn-outline:hover * {
+    color: #ffffff !important;
 }
 .btn-success {
     background: var(--success);
     color: white;
 }
 .btn-success:hover {
-    background: #219653;
+    background: #388e3c;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+    box-shadow: 0 4px 12px rgba(67, 160, 71, 0.3);
 }
 .w-100 { width: 100%; }
 .mt-4 { margin-top: 1rem; }
@@ -163,7 +170,7 @@ body {
 .spinner {
     width: 50px;
     height: 50px;
-    border: 5px solid rgba(43, 92, 119, 0.2);
+    border: 5px solid rgba(81, 45, 168, 0.2);
     border-top-color: var(--primary-color);
     border-radius: 50%;
     animation: spin 1s linear infinite;
@@ -216,7 +223,7 @@ body {
 .form-group input:focus, .form-group select:focus {
     outline: none;
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(43, 92, 119, 0.1);
+    box-shadow: 0 0 0 3px rgba(81, 45, 168, 0.1);
 }
 .section-footer {
     display: flex;
@@ -238,7 +245,7 @@ body {
         gap: 1.5rem;
     }
     .pertanyaan-container {
-        gap: 0.5rem; /* Jarak antar pertanyaan dikurangi drastis */
+        gap: 0.5rem; 
     }
     .pertanyaan-card {
         padding: 0.75rem 1rem;
@@ -307,12 +314,12 @@ body {
     align-items: center;
 }
 .kategori-item:hover {
-    background: rgba(43, 92, 119, 0.05);
+    background: rgba(81, 45, 168, 0.05);
 }
 .kategori-item.active {
     background: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 12px rgba(43, 92, 119, 0.2);
+    box-shadow: 0 4px 12px rgba(81, 45, 168, 0.2);
 }
 .kategori-item .status-icon {
     font-size: 0.8rem;
@@ -397,7 +404,7 @@ body {
 }
 .radio-btn input[type="radio"]:checked + .radio-label {
     border-color: var(--primary-color);
-    background: rgba(43, 92, 119, 0.1);
+    background: rgba(81, 45, 168, 0.1);
     color: var(--primary-color);
 }
 .catatan-input {
